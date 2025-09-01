@@ -21,7 +21,10 @@ export class AvailablePlacesComponent implements OnInit {
   private httpClient = inject(HttpClient)
   private destroyRef = inject(DestroyRef)
 
+  isFetchingData = signal(false)
+
   ngOnInit(): void {
+      this.isFetchingData.set(true)
       const subs = this.httpClient.get<{places: Place[]}>('http://localhost:3000/places')
       .pipe(
         map((resData) => resData.places)
@@ -31,6 +34,9 @@ export class AvailablePlacesComponent implements OnInit {
           next: (places) => {
             console.log('places:',places);
             this.places.set(places)
+          },
+          complete: () => {
+            this.isFetchingData.set(false)
           }
         }
       )
