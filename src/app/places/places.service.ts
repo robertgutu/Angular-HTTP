@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import {map,catchError, Observable, throwError,tap} from 'rxjs'
 import { Place } from './place.model';
 import { HttpClient } from '@angular/common/http';
+import { ErrorService } from '../shared/error.service';
 
 
 @Injectable({
@@ -9,10 +10,11 @@ import { HttpClient } from '@angular/common/http';
 })
 export class PlacesService {
   private httpClient=inject(HttpClient)
-
   private userPlaces = signal<Place[]>([]);
+  private errorService = inject(ErrorService)
 
   loadedUserPlaces = this.userPlaces.asReadonly();
+  
 
   loadAvailablePlaces() {
     return this.fetchPlaces(
@@ -46,6 +48,7 @@ export class PlacesService {
       }).pipe(
         catchError(error => {
           this.userPlaces.set(prevPlaces)
+          this.errorService.showError('Failed to store selected place!!!')
           return throwError(() => new Error('Failed to store selected place.'))
         })
       );
