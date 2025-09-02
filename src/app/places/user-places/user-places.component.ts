@@ -5,6 +5,7 @@ import { PlacesComponent } from '../places.component';
 import { Place } from '../place.model';
 import { HttpClient } from '@angular/common/http';
 import { map,catchError,throwError } from 'rxjs';
+import { PlacesService } from '../places.service';
 
 const apiUrl = 'http://localhost:3000'
 
@@ -20,23 +21,12 @@ export class UserPlacesComponent implements OnInit{
   isFetchingData = signal(false)
   error = signal('')
 
-  private httpClient = inject(HttpClient)
   private destroyRef = inject(DestroyRef)
+  private placesService = inject(PlacesService)
 
   ngOnInit(): void {
     this.isFetchingData.set(true)
-    const url = `${apiUrl}/user-places`
-    const subscribbe = this.httpClient.get<{ places: Place[] }>(url)
-    .pipe(
-      map((resData) => resData.places),
-      catchError((error) => {
-        console.log('err:',error)
-        return throwError( () => {
-          return new Error("Something went wrong while fetching user data")
-        })
-      })
-    )
-    .subscribe(
+    const subscribe = this.placesService.loadUserPlaces().subscribe(
       {
         next: (res) => {
           console.log('places:',res);
@@ -51,5 +41,11 @@ export class UserPlacesComponent implements OnInit{
         }
       }
     )
+
+    this.destroyRef.onDestroy( () => {   
+        subscribe.unsubscribe();
+      } 
+    )
+
   }
 }

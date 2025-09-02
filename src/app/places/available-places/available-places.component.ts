@@ -4,10 +4,10 @@ import { Place } from '../place.model';
 import { PlacesComponent } from '../places.component';
 import { PlacesContainerComponent } from '../places-container/places-container.component';
 import { HttpClient } from '@angular/common/http';
+import { PlacesService } from '../places.service';
 
 
 
-import {map,catchError, Observable, throwError} from 'rxjs'
 
 const apiUrl = 'http://localhost:3000/'
 
@@ -22,26 +22,16 @@ export class AvailablePlacesComponent implements OnInit {
   places = signal<Place[] | undefined>(undefined);
   private httpClient = inject(HttpClient)
   private destroyRef = inject(DestroyRef)
+  private placesService = inject(PlacesService)
 
   isFetchingData = signal(false)
   error = signal('')
 
   ngOnInit(): void {
       this.isFetchingData.set(true)
-      const subs = this.httpClient.get<{places: Place[]}>(`${apiUrl}places`)
-      .pipe(
-        map((resData) => resData.places),
-        catchError((error) => {
-          console.log('err:',error)
-          return throwError( () => {
-            return new Error("Something went wrong while fetching data")
-          })
-        })
-      )
-      .subscribe(
+      const subs = this.placesService.loadAvailablePlaces().subscribe(
         {
           next: (places) => {
-            console.log('places:',places);
             this.places.set(places)
           },
           error: (error:Error) => {
@@ -61,19 +51,7 @@ export class AvailablePlacesComponent implements OnInit {
   }; 
 
   onSelectPlace(place: Place){
-    const url = `${apiUrl}user-places`
-    console.log("place beefore put",place);
-    
-    this.httpClient.put( 
-      url, 
-      {
-        placeId: place.id
-      }
-    ).subscribe(
-      {
-        next: (res) => console.log(res)
-      }
-    )
+    this.placesService.addPlaceToUserPlaces(place.id)
   }
 
 }
