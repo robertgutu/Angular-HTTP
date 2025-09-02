@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import {map,catchError, Observable, throwError} from 'rxjs'
+import {map,catchError, Observable, throwError,tap} from 'rxjs'
 import { Place } from './place.model';
 import { HttpClient } from '@angular/common/http';
 
@@ -22,9 +22,15 @@ export class PlacesService {
   }
 
   loadUserPlaces() {
+    console.log("loadUserPlaces")
     return this.fetchPlaces(
       'http://localhost:3000/user-places',
       'Something went wrong while fetching user places"'
+    ).pipe(
+      // tap allows to write some code similar with the one in subscribe() without using subscribe
+      tap({
+        next: (userPlaces) => this.userPlaces.set(userPlaces),
+      })
     )
   }
 
@@ -33,10 +39,6 @@ export class PlacesService {
       'http://localhost:3000/user-places', 
       {
         placeId: placeId
-      }
-    ).subscribe(
-      {
-        next: (res) => console.log(res)
       }
     )
   }

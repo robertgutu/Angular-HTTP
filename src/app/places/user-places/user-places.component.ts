@@ -17,21 +17,18 @@ const apiUrl = 'http://localhost:3000'
   imports: [PlacesContainerComponent, PlacesComponent],
 })
 export class UserPlacesComponent implements OnInit{
-  userPlaces = signal<Place[]>([])
   isFetchingData = signal(false)
   error = signal('')
 
   private destroyRef = inject(DestroyRef)
   private placesService = inject(PlacesService)
 
+  userPlaces = this.placesService.loadedUserPlaces;
+
   ngOnInit(): void {
     this.isFetchingData.set(true)
     const subscribe = this.placesService.loadUserPlaces().subscribe(
       {
-        next: (res) => {
-          console.log('places:',res);
-          this.userPlaces.set(res)
-        },
         error: (error:Error) => {
           console.log("Error occured",error);
           this.error.set(error.message)
