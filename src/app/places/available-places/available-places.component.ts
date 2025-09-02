@@ -51,7 +51,7 @@ export class AvailablePlacesComponent implements OnInit {
   }; 
 
   onSelectPlace(place: Place){
-    this.placesService.addPlaceToUserPlaces(place.id).subscribe(
+    this.placesService.addPlaceToUserPlaces(place).subscribe(
       {
         next: (res) => console.log(res)
       }
