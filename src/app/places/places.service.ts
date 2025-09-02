@@ -65,7 +65,7 @@ export class PlacesService {
 
     return this.httpClient.delete(`http://localhost:3000/user-places/${place.id}`).pipe(
       catchError(error => {
-        this.userPlaces.set(newPlaces)
+        this.userPlaces.set(prevPlaces)
         this.errorService.showError('Failed to delete selected place!!!')
         return throwError(() => new Error('Failed to delete selected place.'))
       })
