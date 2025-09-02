@@ -55,7 +55,21 @@ export class PlacesService {
   }
 
   removeUserPlace(place: Place) {
+    const prevPlaces = this.userPlaces(); 
     
+    const newPlaces = [...prevPlaces].filter(el => el.id !== place.id)
+
+    if(prevPlaces.some((p) => p.id === place.id)){ 
+      this.userPlaces.set(newPlaces)
+    }
+
+    return this.httpClient.delete(`http://localhost:3000/user-places/${place.id}`).pipe(
+      catchError(error => {
+        this.userPlaces.set(newPlaces)
+        this.errorService.showError('Failed to delete selected place!!!')
+        return throwError(() => new Error('Failed to delete selected place.'))
+      })
+    )
   }
 
   private fetchPlaces(url:string, errorMsg:string) {
