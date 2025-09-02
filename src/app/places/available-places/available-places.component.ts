@@ -9,6 +9,8 @@ import { HttpClient } from '@angular/common/http';
 
 import {map,catchError, Observable, throwError} from 'rxjs'
 
+const apiUrl = 'http://localhost:3000/'
+
 @Component({
   selector: 'app-available-places',
   standalone: true,
@@ -26,7 +28,7 @@ export class AvailablePlacesComponent implements OnInit {
 
   ngOnInit(): void {
       this.isFetchingData.set(true)
-      const subs = this.httpClient.get<{places: Place[]}>('http://localhost:3000/places')
+      const subs = this.httpClient.get<{places: Place[]}>(`${apiUrl}places`)
       .pipe(
         map((resData) => resData.places),
         catchError((error) => {
@@ -57,5 +59,21 @@ export class AvailablePlacesComponent implements OnInit {
         } 
       )
   }; 
+
+  onSelectPlace(place: Place){
+    const url = `${apiUrl}user-places`
+    console.log("place beefore put",place);
+    
+    this.httpClient.put( 
+      url, 
+      {
+        placeId: place.id
+      }
+    ).subscribe(
+      {
+        next: (res) => console.log(res)
+      }
+    )
+  }
 
 }
