@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 
 
 
-import {map} from 'rxjs'
+import {map,catchError, Observable, throwError} from 'rxjs'
 
 @Component({
   selector: 'app-available-places',
@@ -22,18 +22,29 @@ export class AvailablePlacesComponent implements OnInit {
   private destroyRef = inject(DestroyRef)
 
   isFetchingData = signal(false)
+  error = signal('')
 
   ngOnInit(): void {
       this.isFetchingData.set(true)
       const subs = this.httpClient.get<{places: Place[]}>('http://localhost:3000/places')
       .pipe(
-        map((resData) => resData.places)
+        map((resData) => resData.places),
+        catchError((error) => {
+          console.log('err:',error)
+          return throwError( () => {
+            return new Error("Something went wrong while fetching data")
+          })
+        })
       )
       .subscribe(
         {
           next: (places) => {
             console.log('places:',places);
             this.places.set(places)
+          },
+          error: (error:Error) => {
+            console.log("Error occured",error);
+            this.error.set(error.message)
           },
           complete: () => {
             this.isFetchingData.set(false)
